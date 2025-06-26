@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Психолог - Голосовые сессии</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .status {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+
+        .status.active {
+            background: #f0fff4;
+            border-color: #68d391;
+            color: #2f855a;
+        }
+
+        .status.listening {
+            background: #fff5f5;
+            border-color: #fc8181;
+            color: #c53030;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .conversation {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.ai {
+            background: white;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .typing {
+            display: none;
+            color: #718096;
+            font-style: italic;
+            padding: 10px 16px;
+        }
+
+        .typing.show {
+            display: block;
+        }
+
+        .settings {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .settings h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .setting-item label {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        select, input[type="range"] {
+            padding: 5px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .disclaimer {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff5f5;
+            border-radius: 12px;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 AI Психолог</h1>
+            <p>Голосовые сессии с искусственным интеллектом</p>
+        </div>
+
+        <div class="status" id="status">
+            Готов к разговору. Нажмите "Начать сессию"
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="startBtn">
+                🎤 Начать сессию
+            </button>
+            <button class="btn btn-secondary" id="stopBtn" disabled>
+                ⏹️ Завершить
+            </button>
+        </div>
+
+        <div class="conversation" id="conversation">
+            <div class="message ai">
+                Здравствуйте! Я ваш AI психолог. Расскажите, что вас беспокоит, и я постараюсь помочь. Вы можете говорить вслух или печатать.
+            </div>
+        </div>
+
+        <div class="typing" id="typing">AI психолог печатает...</div>
+
+        <div class="controls">
+            <button class="btn btn-secondary" id="voiceBtn" disabled>
+                🎙️ Говорить
+            </button>
+            <button class="btn btn-secondary" id="textBtn">
+                ⌨️ Написать
+            </button>
+        </div>
+
+        <div class="settings">
+            <h3>⚙️ Настройки</h3>
+            <div class="setting-item">
+                <label>Голос AI:</label>
+                <select id="voiceSelect">
+                    <option value="0">Женский (рус)</option>
+                    <option value="1">Мужской (рус)</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label>Скорость речи:</label>
+                <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1">
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            ⚠️ Это демо-версия AI психолога. Не заменяет профессиональную психологическую помощь.
+        </div>
+    </div>
+
+    <script>
+        class AIPsychologist {
+            constructor() {
+                this.isListening = false;
+                this.isSessionActive = false;
+                this.recognition = null;
+                this.synthesis = window.speechSynthesis;
+                this.voices = [];
+                this.conversationHistory = [];
+                
+                this.initElements();
+                this.initSpeech();
+                this.initEventListeners();
+                this.loadVoices();
+            }
+
+            initElements() {
+                this.statusEl = document.getElementById('status');
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.voiceBtn = document.getElementById('voiceBtn');
+                this.textBtn = document.getElementById('textBtn');
+                this.conversationEl = document.getElementById('conversation');
+                this.typingEl = document.getElementById('typing');
+                this.voiceSelect = document.getElementById('voiceSelect');
+                this.speechRate = document.getElementById('speechRate');
+            }
+
+            initSpeech() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                    this.recognition.continuous = false;
+                    this.recognition.interimResults = false;
+                    this.recognition.lang = 'ru-RU';
+
+                    this.recognition.onstart = () => {
+                        this.isListening = true;
+                        this.updateStatus('Слушаю вас...', 'listening');
+                        this.voiceBtn.textContent = '⏸️ Остановить';
+                    };
+
+                    this.recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        this.addMessage(transcript, 'user');
+                        this.processUserInput(transcript);
+                    };
+
+                    this.recognition.onerror = (event) => {
+                        console.error('Speech recognition error:', event.error);
+                        this.updateStatus('Ошибка распознавания речи. Попробуйте еще раз.', 'error');
+                        this.isListening = false;
+                        this.voiceBtn.textContent = '🎙️ Говорить';
+                    };
+
+                    this.recognition.onend = () => {
+                        this.isListening = false;
+                        this.voiceBtn.textContent = '🎙️ Говорить';
+                        if (this.isSessionActive) {
+                            this.updateStatus('Готов к продолжению разговора', 'active');
+                        }
+                    };
+                } else {
+                    console.warn('Speech recognition not supported');
+                }
+            }
+
+            loadVoices() {
+                const loadVoicesCallback = () => {
+                    this.voices = this.synthesis.getVoices().filter(voice => 
+                        voice.lang.includes('ru') || voice.lang.includes('en')
+                    );
+                };
+
+                loadVoicesCallback();
+                this.synthesis.onvoiceschanged = loadVoicesCallback;
+            }
+
+            initEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startSession());
+                this.stopBtn.addEventListener('click', () => this.stopSession());
+                this.voiceBtn.addEventListener('click', () => this.toggleVoiceInput());
+                this.textBtn.addEventListener('click', () => this.showTextInput());
+            }
+
+            startSession() {
+                this.isSessionActive = true;
+                this.startBtn.disabled = true;
+                this.stopBtn.disabled = false;
+                this.voiceBtn.disabled = false;
+                this.updateStatus('Сессия начата. Можете говорить или писать', 'active');
+                
+                // Приветственное сообщение
+                this.speak("Здравствуйте! Я готов вас выслушать. Расскажите, что вас беспокоит.");
+            }
+
+            stopSession() {
+                this.isSessionActive = false;
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.voiceBtn.disabled = true;
+                
+                if (this.isListening) {
+                    this.recognition.stop();
+                }
+                
+                this.updateStatus('Сессия завершена. Берегите себя!', '');
+                this.speak("Сессия завершена. Надеюсь, наш разговор был полезен. Берегите себя!");
+            }
+
+            toggleVoiceInput() {
+                if (!this.recognition) {
+                    alert('Голосовой ввод не поддерживается в вашем браузере');
+                    return;
+                }
+
+                if (this.isListening) {
+                    this.recognition.stop();
+                } else {
+                    this.recognition.start();
+                }
+            }
+
+            showTextInput() {
+                const text = prompt('Введите ваше сообщение:');
+                if (text && text.trim()) {
+                    this.addMessage(text, 'user');
+                    this.processUserInput(text);
+                }
+            }
+
+            processUserInput(input) {
+                this.conversationHistory.push({role: 'user', content: input});
+                
+                // Показываем индикатор печатания
+                this.showTyping();
+                
+                // Симуляция обработки AI (в реальности здесь будет вызов OpenAI API)
+                setTimeout(() => {
+                    const response = this.generateAIResponse(input);
+                    this.hideTyping();
+                    this.addMessage(response, 'ai');
+                    this.speak(response);
+                    this.conversationHistory.push({role: 'assistant', content: response});
+                }, 1500 + Math.random() * 2000);
+            }
+
+            generateAIResponse(input) {
+                // Это упрощенная логика. В реальности здесь будет OpenAI API
+                const responses = {
+                    stress: [
+                        "Понимаю, что вы переживаете стресс. Расскажите подробнее, что именно вас беспокоит?",
+                        "Стресс - это нормальная реакция на сложные ситуации. Какие методы релаксации вы пробовали?",
+                        "Давайте вместе найдем способы справиться со стрессом. Что помогало вам раньше?"
+                    ],
+                    anxiety: [
+                        "Тревога может быть очень изматывающей. Когда вы впервые заметили эти ощущения?",
+                        "Понимаю ваше беспокойство. Попробуем вместе разобраться в причинах тревоги.",
+                        "Тревожные мысли имеют свойство усиливаться. Давайте поработаем с техниками успокоения."
+                    ],
+                    relationships: [
+                        "Отношения с близкими очень важны. Расскажите больше о ситуации.",
+                        "Конфликты в отношениях - это возможность для роста. Как вы видите решение?",
+                        "Понимаю, что отношения могут быть сложными. Что вы чувствуете в этой ситуации?"
+                    ],
+                    default: [
+                        "Спасибо, что поделились со мной. Расскажите больше о ваших чувствах.",
+                        "Я внимательно вас слушаю. Как это влияет на вашу повседневную жизнь?",
+                        "Понимаю. Что вы думаете об этой ситуации? Какие у вас есть мысли?"
+                    ]
+                };
+
+                const lowerInput = input.toLowerCase();
+                let responseCategory = 'default';
+
+                if (lowerInput.includes('стресс') || lowerInput.includes('нервы') || lowerInput.includes('напряжение')) {
+                    responseCategory = 'stress';
+                } else if (lowerInput.includes('тревог') || lowerInput.includes('беспоко') || lowerInput.includes('страх')) {
+                    responseCategory = 'anxiety';
+                } else if (lowerInput.includes('отношени') || lowerInput.includes('семья') || lowerInput.includes('партнер')) {
+                    responseCategory = 'relationships';
+                }
+
+                const categoryResponses = responses[responseCategory];
+                return categoryResponses[Math.floor(Math.random() * categoryResponses.length)];
+            }
+
+            speak(text) {
+                // Останавливаем предыдущую речь
+                this.synthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Настройки голоса
+                const selectedVoiceIndex = parseInt(this.voiceSelect.value);
+                if (this.voices[selectedVoiceIndex]) {
+                    utterance.voice = this.voices[selectedVoiceIndex];
+                }
+                
+                utterance.rate = parseFloat(this.speechRate.value);
+                utterance.pitch = 1;
+                utterance.volume = 1;
+                
+                this.synthesis.speak(utterance);
+            }
+
+            addMessage(text, sender) {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${sender}`;
+                messageEl.textContent = text;
+                
+                this.conversationEl.appendChild(messageEl);
+                this.conversationEl.scrollTop = this.conversationEl.scrollHeight;
+            }
+
+            showTyping() {
+                this.typingEl.classList.add('show');
+                this.conversationEl.scrollTop = this.conversationEl.scrollHeight;
+            }
+
+            hideTyping() {
+                this.typingEl.classList.remove('show');
+            }
+
+            updateStatus(message, className = '') {
+                this.statusEl.textContent = message;
+                this.statusEl.className = `status ${className}`;
+            }
+        }
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            new AIPsychologist();
+        });
+    </script>
+</body>
+</html>
