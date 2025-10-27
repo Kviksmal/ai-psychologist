@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Психолог</title>
+    <title>AI Психолог - Достигайте целей</title>
+
+    <!-- ElevenLabs Conversational AI -->
+    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
     <style>
         /* ===== DESIGN SYSTEM ===== */
         :root {
@@ -17,6 +21,8 @@
             --accent-primary: #10B981;
             --accent-hover: #059669;
             --accent-light: #D1FAE5;
+            --accent-warning: #F59E0B;
+            --accent-success: #10B981;
             --border-color: #E8E5E0;
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
             --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -30,6 +36,7 @@
             --font-size-lg: 18px;
             --font-size-xl: 24px;
             --font-size-2xl: 32px;
+            --font-size-3xl: 40px;
 
             /* Spacing */
             --spacing-xs: 4px;
@@ -79,16 +86,13 @@
         .screen {
             display: none;
             min-height: 100vh;
-            padding-bottom: 80px; /* Space for bottom nav */
         }
 
         .screen.active {
             display: block;
         }
 
-        /* ===== COMPONENTS ===== */
-
-        /* Header */
+        /* ===== HEADER ===== */
         .header {
             background: var(--bg-secondary);
             padding: var(--spacing-md) var(--spacing-lg);
@@ -121,12 +125,12 @@
             background: var(--bg-tertiary);
         }
 
-        /* Container */
+        /* ===== CONTAINER ===== */
         .container {
             padding: var(--spacing-lg);
         }
 
-        /* Button */
+        /* ===== BUTTONS ===== */
         .btn {
             background: var(--accent-primary);
             color: white;
@@ -156,10 +160,46 @@
             background: var(--border-color);
         }
 
-        /* Card */
+        .btn-large {
+            padding: var(--spacing-lg) var(--spacing-xl);
+            font-size: var(--font-size-lg);
+        }
+
+        .btn-sos {
+            background: #EF4444;
+            color: white;
+        }
+
+        .btn-sos:hover {
+            background: #DC2626;
+        }
+
+        /* ===== CARDS ===== */
         .card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            transition: all var(--transition-base);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card.clickable {
+            cursor: pointer;
+        }
+
+        .card.clickable:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ===== GOAL CARDS ===== */
+        .goal-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
             border-radius: var(--radius-lg);
             padding: var(--spacing-lg);
             margin-bottom: var(--spacing-md);
@@ -167,26 +207,190 @@
             transition: all var(--transition-base);
         }
 
-        .card:hover {
+        .goal-card:hover {
+            border-color: var(--accent-primary);
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
         }
 
-        .card-title {
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
+        .goal-card.completed {
+            background: var(--accent-light);
+            border-color: var(--accent-success);
         }
 
-        .card-description {
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .goal-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .goal-status {
+            font-size: var(--font-size-sm);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            background: var(--bg-tertiary);
             color: var(--text-secondary);
+        }
+
+        .goal-status.active {
+            background: var(--accent-light);
+            color: var(--accent-primary);
+        }
+
+        .goal-status.completed {
+            background: var(--accent-success);
+            color: white;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin: var(--spacing-md) 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-hover));
+            transition: width var(--transition-base);
+        }
+
+        .goal-stats {
+            display: flex;
+            gap: var(--spacing-md);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .goal-next {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
             font-size: var(--font-size-sm);
         }
 
-        /* Input */
+        /* ===== WELCOME SCREEN ===== */
+        .welcome-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+
+        .logo {
+            font-size: 80px;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .welcome-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+        }
+
+        .welcome-subtitle {
+            font-size: var(--font-size-lg);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-2xl);
+            max-width: 360px;
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard-header {
+            padding: var(--spacing-xl) var(--spacing-lg);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+            color: white;
+        }
+
+        .dashboard-greeting {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .dashboard-subtitle {
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-2xl) var(--spacing-lg);
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* ===== VOICE SESSION SCREEN ===== */
+        .voice-session {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            padding: var(--spacing-xl);
+            text-align: center;
+        }
+
+        .voice-avatar {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            margin-bottom: var(--spacing-xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .voice-status {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .voice-hint {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        /* ===== NEW GOAL FORM ===== */
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-primary);
+        }
+
+        .form-hint {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-sm);
+        }
+
         .input {
             width: 100%;
             padding: var(--spacing-md);
@@ -208,468 +412,88 @@
             resize: vertical;
         }
 
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 480px;
-            width: 100%;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-around;
-            padding: var(--spacing-sm) 0;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: var(--spacing-sm);
-            border: none;
-            background: none;
-            cursor: pointer;
-            color: var(--text-light);
-            font-size: var(--font-size-xs);
-            transition: color var(--transition-fast);
-        }
-
-        .nav-item.active {
-            color: var(--accent-primary);
-        }
-
-        .nav-icon {
-            font-size: 24px;
-        }
-
-        /* ===== WELCOME SCREEN ===== */
-        .welcome-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 80px);
-            text-align: center;
-            padding: var(--spacing-xl);
-        }
-
-        .logo {
-            font-size: 80px;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .welcome-title {
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            margin-bottom: var(--spacing-md);
-            color: var(--text-primary);
-        }
-
-        .welcome-subtitle {
-            font-size: var(--font-size-lg);
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-2xl);
-            max-width: 300px;
-        }
-
-        .welcome-footer {
-            margin-top: auto;
-            padding-top: var(--spacing-xl);
-        }
-
-        .link {
-            color: var(--accent-primary);
-            text-decoration: none;
-            font-size: var(--font-size-sm);
-        }
-
-        /* ===== ONBOARDING SCREEN ===== */
-        .onboarding-step {
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .step-title {
-            font-size: var(--font-size-xl);
-            font-weight: 600;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .step-subtitle {
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-lg);
-        }
-
         .checkbox-group {
             display: flex;
             flex-direction: column;
             gap: var(--spacing-sm);
         }
 
-        .checkbox-label {
+        .checkbox-item {
             display: flex;
             align-items: center;
             gap: var(--spacing-sm);
             padding: var(--spacing-md);
-            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
             border-radius: var(--radius-md);
             cursor: pointer;
             transition: all var(--transition-fast);
         }
 
-        .checkbox-label:hover {
-            background: var(--bg-tertiary);
+        .checkbox-item:hover {
+            background: var(--border-color);
         }
 
-        .checkbox-label input {
+        .checkbox-item input[type="checkbox"] {
             width: 20px;
             height: 20px;
             cursor: pointer;
         }
 
-        /* ===== MODE SELECTION ===== */
-        .mode-grid {
-            display: grid;
-            gap: var(--spacing-md);
-            margin-top: var(--spacing-xl);
-        }
-
-        .mode-card {
-            padding: var(--spacing-xl);
-            text-align: center;
-        }
-
-        .mode-icon {
-            font-size: 48px;
-            margin-bottom: var(--spacing-md);
-        }
-
-        /* ===== CHAT SCREEN ===== */
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 140px); /* Header + bottom nav */
-        }
-
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: var(--spacing-lg);
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-md);
-        }
-
-        .message {
-            max-width: 80%;
-            padding: var(--spacing-md) var(--spacing-lg);
-            border-radius: var(--radius-lg);
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.ai {
-            background: var(--bg-tertiary);
-            align-self: flex-start;
-            border-bottom-left-radius: var(--spacing-xs);
-        }
-
-        .message.user {
-            background: var(--accent-primary);
+        /* ===== GOAL DETAIL SCREEN ===== */
+        .goal-detail-header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
             color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: var(--spacing-xs);
+            padding: var(--spacing-xl) var(--spacing-lg);
         }
 
-        .typing-indicator {
-            display: none;
-            padding: var(--spacing-md);
-            color: var(--text-secondary);
-            font-style: italic;
-        }
-
-        .typing-indicator.show {
-            display: block;
-        }
-
-        .chat-input-container {
-            padding: var(--spacing-md) var(--spacing-lg);
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: var(--spacing-sm);
-            align-items: center;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: var(--spacing-md);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-base);
-            font-family: var(--font-family);
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-        }
-
-        .btn-send {
-            background: var(--accent-primary);
-            color: white;
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--transition-fast);
-        }
-
-        .btn-send:hover {
-            background: var(--accent-hover);
-            transform: scale(1.05);
-        }
-
-        .btn-voice {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .btn-voice.recording {
-            background: #EF4444;
-            color: white;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        /* ===== MOOD DIARY ===== */
-        .mood-selector {
-            display: flex;
-            justify-content: space-around;
-            margin: var(--spacing-xl) 0;
-        }
-
-        .mood-btn {
-            font-size: 48px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: transform var(--transition-fast);
-            opacity: 0.5;
-        }
-
-        .mood-btn:hover,
-        .mood-btn.selected {
-            transform: scale(1.2);
-            opacity: 1;
-        }
-
-        .mood-chart {
-            background: var(--bg-tertiary);
-            padding: var(--spacing-lg);
-            border-radius: var(--radius-lg);
-            margin: var(--spacing-lg) 0;
-        }
-
-        /* ===== HISTORY ===== */
-        .session-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .session-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .session-date {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .session-duration {
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-        }
-
-        .session-topic {
-            color: var(--accent-primary);
-            font-size: var(--font-size-sm);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .session-summary {
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-            line-height: 1.5;
-        }
-
-        /* ===== STATISTICS ===== */
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: var(--spacing-md);
-            margin: var(--spacing-lg) 0;
-        }
-
-        .stat-card {
-            background: var(--bg-tertiary);
-            padding: var(--spacing-lg);
-            border-radius: var(--radius-lg);
-            text-align: center;
-        }
-
-        .stat-value {
+        .goal-detail-title {
             font-size: var(--font-size-2xl);
             font-weight: 700;
-            color: var(--accent-primary);
+            margin-bottom: var(--spacing-sm);
         }
 
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-            margin-top: var(--spacing-xs);
-        }
-
-        /* ===== RESOURCES ===== */
-        .resource-card {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-            padding: var(--spacing-lg);
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            margin-bottom: var(--spacing-md);
-            cursor: pointer;
-            transition: all var(--transition-base);
-        }
-
-        .resource-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateX(4px);
-        }
-
-        .resource-icon {
-            font-size: 32px;
-        }
-
-        .resource-content {
-            flex: 1;
-        }
-
-        .resource-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .resource-description {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-        }
-
-        /* ===== EMERGENCY ===== */
-        .emergency-container {
-            text-align: center;
-            padding: var(--spacing-xl);
-        }
-
-        .emergency-icon {
-            font-size: 80px;
-            color: #EF4444;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .emergency-title {
+        .goal-detail-progress {
             font-size: var(--font-size-xl);
-            font-weight: 700;
-            margin-bottom: var(--spacing-md);
+            opacity: 0.9;
         }
 
-        .emergency-text {
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .hotline-card {
-            background: var(--bg-tertiary);
+        .sessions-list {
             padding: var(--spacing-lg);
-            border-radius: var(--radius-lg);
-            margin-bottom: var(--spacing-md);
-            text-align: left;
         }
 
-        .hotline-name {
-            font-weight: 600;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .hotline-number {
-            font-size: var(--font-size-lg);
-            color: var(--accent-primary);
-            font-weight: 700;
-        }
-
-        /* ===== SETTINGS ===== */
-        .settings-group {
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .settings-group-title {
-            font-size: var(--font-size-sm);
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .setting-item {
+        .session-item {
             display: flex;
             justify-content: space-between;
+            padding: var(--spacing-md);
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
             align-items: center;
-            padding: var(--spacing-md) 0;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
             border-bottom: 1px solid var(--border-color);
         }
 
-        .setting-label {
-            font-size: var(--font-size-base);
+        .task-item:last-child {
+            border-bottom: none;
         }
 
-        select {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            font-family: var(--font-family);
-            font-size: var(--font-size-sm);
+        .task-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
         }
 
         /* ===== UTILITIES ===== */
@@ -685,12 +509,24 @@
             margin-bottom: var(--spacing-lg);
         }
 
+        .mt-md {
+            margin-top: var(--spacing-md);
+        }
+
         .mt-lg {
             margin-top: var(--spacing-lg);
         }
 
         .hidden {
             display: none;
+        }
+
+        /* ===== ELEVENLABS WIDGET CUSTOM STYLES ===== */
+        elevenlabs-convai {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
         }
     </style>
 </head>
@@ -701,262 +537,159 @@
         <div class="screen active" id="screen-welcome">
             <div class="welcome-content">
                 <div class="logo">🌿</div>
-                <h1 class="welcome-title">Добро пожаловать</h1>
-                <p class="welcome-subtitle">Безопасное пространство для разговора о важном</p>
-                <button class="btn" onclick="app.showScreen('onboarding')">Начать</button>
-                <div class="welcome-footer">
-                    <a href="#" class="link" onclick="app.showScreen('emergency'); return false;">Нужна экстренная помощь?</a>
+                <h1 class="welcome-title">AI Психолог</h1>
+                <p class="welcome-subtitle">Достигайте реальных изменений с помощью целей и AI-терапии</p>
+                <button class="btn btn-large" onclick="app.showScreen('dashboard')">Начать</button>
+                <div style="margin-top: auto; padding-top: var(--spacing-xl);">
+                    <a href="#" style="color: var(--accent-primary); text-decoration: none; font-size: var(--font-size-sm);"
+                       onclick="app.showScreen('emergency'); return false;">Нужна экстренная помощь?</a>
                 </div>
             </div>
         </div>
 
-        <!-- ONBOARDING SCREEN -->
-        <div class="screen" id="screen-onboarding">
+        <!-- DASHBOARD SCREEN -->
+        <div class="screen" id="screen-dashboard">
+            <div class="dashboard-header">
+                <div class="dashboard-greeting">Привет!</div>
+                <div class="dashboard-subtitle">Над чем работаем сегодня?</div>
+            </div>
+
+            <div class="container">
+                <div id="goalsList">
+                    <!-- Goals will be rendered here -->
+                </div>
+
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">🎯</div>
+                    <h3>Начните с первой цели</h3>
+                    <p>Психотерапия работает лучше, когда вы знаете, к чему стремитесь</p>
+                </div>
+
+                <button class="btn mt-lg" onclick="app.showScreen('new-goal')">
+                    ➕ Добавить новую цель
+                </button>
+
+                <button class="btn btn-sos mt-md" onclick="app.showScreen('emergency')">
+                    🆘 Нужна помощь сейчас
+                </button>
+            </div>
+        </div>
+
+        <!-- NEW GOAL SCREEN -->
+        <div class="screen" id="screen-new-goal">
             <div class="header">
-                <button class="btn-icon" onclick="app.showScreen('welcome')">←</button>
-                <div class="header-title">Знакомство</div>
+                <button class="btn-icon" onclick="app.showScreen('dashboard')">←</button>
+                <div class="header-title">Новая цель</div>
                 <div style="width: 32px;"></div>
             </div>
+
             <div class="container">
-                <div class="onboarding-step">
-                    <h2 class="step-title">Как к вам обращаться?</h2>
-                    <p class="step-subtitle">Это поможет сделать общение более личным</p>
-                    <input type="text" class="input" id="userName" placeholder="Введите ваше имя">
+                <div class="form-group">
+                    <label class="form-label">Что вас беспокоит?</label>
+                    <p class="form-hint">Опишите проблему своими словами</p>
+                    <input type="text" class="input" id="goalProblem"
+                           placeholder="Например: стресс на работе, тревожность, проблемы в отношениях">
                 </div>
 
-                <div class="onboarding-step">
-                    <h2 class="step-title">Что привело вас сюда?</h2>
-                    <textarea class="input textarea" id="userGoals" placeholder="Расскажите о своих целях и ожиданиях..."></textarea>
+                <div class="form-group">
+                    <label class="form-label">Что конкретно хотите изменить?</label>
+                    <p class="form-hint">Сформулируйте желаемый результат</p>
+                    <textarea class="input textarea" id="goalDesired"
+                              placeholder="Например: перестать просыпаться с тревогой, научиться говорить 'нет'"></textarea>
                 </div>
 
-                <div class="onboarding-step">
-                    <h2 class="step-title">С чем чаще всего сталкиваетесь?</h2>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="stress"> Стресс и напряжение
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="anxiety"> Тревога и беспокойство
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="relationships"> Сложности в отношениях
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="self-esteem"> Самооценка и уверенность
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="work"> Работа и карьера
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="other"> Другое
-                        </label>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">Как поймёте, что цель достигнута?</label>
+                    <p class="form-hint">Измеримые критерии успеха</p>
+                    <textarea class="input textarea" id="goalCriteria"
+                              placeholder="Например: засыпаю спокойно 5 дней подряд, не проверяю почту после 19:00"></textarea>
                 </div>
 
-                <button class="btn mt-lg" onclick="app.completeOnboarding()">Продолжить</button>
+                <div class="form-group">
+                    <label class="form-label">Сколько времени даёте на достижение?</label>
+                    <select class="input" id="goalDuration">
+                        <option value="2">2 недели</option>
+                        <option value="4" selected>4 недели (рекомендуется)</option>
+                        <option value="6">6 недель</option>
+                        <option value="8">8 недель</option>
+                        <option value="12">12 недель</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-large mt-lg" onclick="app.createGoal()">
+                    Создать цель и начать
+                </button>
             </div>
         </div>
 
-        <!-- MODE SELECTION SCREEN -->
-        <div class="screen" id="screen-mode">
-            <div class="header">
-                <button class="btn-icon" onclick="app.showScreen('welcome')">←</button>
-                <div class="header-title">Выбор режима</div>
-                <button class="btn-icon" onclick="app.showScreen('settings')">⚙️</button>
+        <!-- GOAL DETAIL SCREEN -->
+        <div class="screen" id="screen-goal-detail">
+            <div class="goal-detail-header">
+                <button class="btn-icon" onclick="app.showScreen('dashboard')" style="color: white;">←</button>
+                <div class="goal-detail-title" id="goalDetailTitle">Стресс на работе</div>
+                <div class="goal-detail-progress" id="goalDetailProgress">Прогресс: 65%</div>
             </div>
-            <div class="container">
-                <h2 class="text-center mb-lg">Как вам удобнее общаться?</h2>
-                <div class="mode-grid">
-                    <div class="card mode-card" onclick="app.startChat('voice')">
-                        <div class="mode-icon">🎙️</div>
-                        <div class="card-title">Голосом</div>
-                        <div class="card-description">Просто говорите, я внимательно слушаю</div>
-                    </div>
-                    <div class="card mode-card" onclick="app.startChat('text')">
-                        <div class="mode-icon">⌨️</div>
-                        <div class="card-title">Текстом</div>
-                        <div class="card-description">Печатайте в своем темпе</div>
-                    </div>
-                    <div class="card mode-card" onclick="app.startChat('hybrid')">
-                        <div class="mode-icon">🔄</div>
-                        <div class="card-title">Комбинированно</div>
-                        <div class="card-description">Голос и текст вместе</div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- CHAT SCREEN -->
-        <div class="screen" id="screen-chat">
-            <div class="header">
-                <button class="btn-icon" onclick="app.endChat()">←</button>
-                <div class="header-title">AI Психолог</div>
-                <button class="btn-icon" onclick="app.showScreen('settings')">⚙️</button>
-            </div>
-            <div class="chat-container">
-                <div class="messages" id="messages"></div>
-                <div class="typing-indicator" id="typing">AI психолог печатает...</div>
-                <div class="chat-input-container">
-                    <button class="btn-send btn-voice" id="voiceBtn" style="display: none;">🎙️</button>
-                    <input type="text" class="chat-input" id="chatInput" placeholder="Введите сообщение...">
-                    <button class="btn-send" onclick="app.sendMessage()">➤</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- SESSION SUMMARY SCREEN -->
-        <div class="screen" id="screen-summary">
-            <div class="header">
-                <button class="btn-icon" onclick="app.showScreen('mode')">✕</button>
-                <div class="header-title">Резюме сессии</div>
-                <div style="width: 32px;"></div>
-            </div>
             <div class="container">
                 <div class="card">
-                    <h3 class="card-title">📝 О чем мы говорили</h3>
-                    <p id="summaryContent" class="card-description"></p>
+                    <h3 style="margin-bottom: var(--spacing-md);">📊 Статус</h3>
+                    <div id="goalDetailStats"></div>
                 </div>
 
                 <div class="card">
-                    <h3 class="card-title">💡 Ключевые инсайты</h3>
-                    <ul id="summaryInsights"></ul>
+                    <h3 style="margin-bottom: var(--spacing-md);">📝 Следующие шаги</h3>
+                    <ul class="task-list" id="goalDetailTasks">
+                        <!-- Tasks will be rendered here -->
+                    </ul>
                 </div>
 
-                <div class="card">
-                    <h3 class="card-title">🎯 Рекомендации</h3>
-                    <ul id="summaryRecommendations"></ul>
-                </div>
-
-                <button class="btn" onclick="app.saveSummary()">Сохранить в дневник</button>
-                <button class="btn btn-secondary mt-lg" onclick="app.showScreen('mode')">Завершить</button>
-            </div>
-        </div>
-
-        <!-- HISTORY SCREEN -->
-        <div class="screen" id="screen-history">
-            <div class="header">
-                <div style="width: 32px;"></div>
-                <div class="header-title">История сессий</div>
-                <button class="btn-icon">🔍</button>
-            </div>
-            <div class="container" id="historyContainer">
-                <!-- Sessions will be added here dynamically -->
-            </div>
-        </div>
-
-        <!-- MOOD DIARY SCREEN -->
-        <div class="screen" id="screen-mood">
-            <div class="header">
-                <div style="width: 32px;"></div>
-                <div class="header-title">Дневник настроения</div>
-                <div style="width: 32px;"></div>
-            </div>
-            <div class="container">
-                <h3 class="text-center mb-md">Как вы себя чувствуете сегодня?</h3>
-                <p class="text-center mb-lg" style="color: var(--text-secondary);" id="moodDate"></p>
-
-                <div class="mood-selector">
-                    <button class="mood-btn" data-mood="great" onclick="app.selectMood('great')">😊</button>
-                    <button class="mood-btn" data-mood="good" onclick="app.selectMood('good')">🙂</button>
-                    <button class="mood-btn" data-mood="okay" onclick="app.selectMood('okay')">😐</button>
-                    <button class="mood-btn" data-mood="bad" onclick="app.selectMood('bad')">😔</button>
-                    <button class="mood-btn" data-mood="terrible" onclick="app.selectMood('terrible')">😢</button>
-                </div>
-
-                <textarea class="input textarea mt-lg" id="moodNote" placeholder="Добавьте заметку о вашем дне (необязательно)..."></textarea>
-                <button class="btn mt-lg" onclick="app.saveMood()">Сохранить</button>
-
-                <div class="mood-chart mt-lg">
-                    <h3 class="mb-md">График настроения за неделю</h3>
-                    <div id="moodChart"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- STATISTICS SCREEN -->
-        <div class="screen" id="screen-stats">
-            <div class="header">
-                <div style="width: 32px;"></div>
-                <div class="header-title">Статистика</div>
-                <div style="width: 32px;"></div>
-            </div>
-            <div class="container">
-                <h3 class="mb-lg">Ваш прогресс</h3>
-
-                <div class="stat-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="statSessions">0</div>
-                        <div class="stat-label">Сессий проведено</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="statTime">0</div>
-                        <div class="stat-label">Минут терапии</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="statDays">0</div>
-                        <div class="stat-label">Дней практики</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="statMood">-</div>
-                        <div class="stat-label">Среднее настроение</div>
-                    </div>
-                </div>
+                <button class="btn btn-large" onclick="app.startSession()">
+                    🎙️ Начать сессию
+                </button>
 
                 <div class="card mt-lg">
-                    <h3 class="card-title">🏷️ Основные темы</h3>
-                    <div id="topicsCloud"></div>
+                    <h3 style="margin-bottom: var(--spacing-md);">История сессий</h3>
+                    <div id="goalDetailSessions"></div>
                 </div>
+
+                <button class="btn btn-secondary mt-lg" onclick="app.completeGoal()">
+                    ✅ Завершить цель
+                </button>
             </div>
         </div>
 
-        <!-- RESOURCES SCREEN -->
-        <div class="screen" id="screen-resources">
+        <!-- VOICE SESSION SCREEN -->
+        <div class="screen" id="screen-session">
             <div class="header">
-                <div style="width: 32px;"></div>
-                <div class="header-title">Ресурсы и практики</div>
+                <button class="btn-icon" onclick="app.endSession()">←</button>
+                <div class="header-title" id="sessionTitle">Сессия</div>
                 <div style="width: 32px;"></div>
             </div>
-            <div class="container">
-                <div class="resource-card" onclick="alert('Дыхательная практика: Вдох 4 сек, задержка 4 сек, выдох 4 сек')">
-                    <div class="resource-icon">🫁</div>
-                    <div class="resource-content">
-                        <div class="resource-title">Дыхательная практика</div>
-                        <div class="resource-description">Техника 4-4-4 для успокоения</div>
-                    </div>
-                </div>
 
-                <div class="resource-card" onclick="alert('Медитация: 5-минутная практика осознанности')">
-                    <div class="resource-icon">🧘</div>
-                    <div class="resource-content">
-                        <div class="resource-title">Медитация</div>
-                        <div class="resource-description">Практика осознанности</div>
-                    </div>
-                </div>
+            <div class="voice-session">
+                <div class="voice-avatar">🧠</div>
+                <div class="voice-status">Разговор с AI психологом</div>
+                <div class="voice-hint">Нажмите на иконку справа внизу, чтобы начать</div>
 
-                <div class="resource-card" onclick="alert('Заземление: Техника 5-4-3-2-1 (5 вещей видишь, 4 слышишь...)')">
-                    <div class="resource-icon">🌍</div>
-                    <div class="resource-content">
-                        <div class="resource-title">Техника заземления</div>
-                        <div class="resource-description">Метод 5-4-3-2-1</div>
+                <div style="margin-top: var(--spacing-2xl); text-align: left; width: 100%;">
+                    <div class="card">
+                        <h4 style="margin-bottom: var(--spacing-sm);">Тема сессии:</h4>
+                        <p id="sessionGoalName" style="color: var(--accent-primary); font-weight: 600;">-</p>
                     </div>
-                </div>
 
-                <div class="resource-card" onclick="alert('Когнитивные упражнения: Переформулирование негативных мыслей')">
-                    <div class="resource-icon">🧠</div>
-                    <div class="resource-content">
-                        <div class="resource-title">Когнитивные упражнения</div>
-                        <div class="resource-description">Работа с мыслями</div>
-                    </div>
-                </div>
-
-                <div class="resource-card" onclick="alert('Полезные материалы и статьи')">
-                    <div class="resource-icon">📚</div>
-                    <div class="resource-content">
-                        <div class="resource-title">Статьи и материалы</div>
-                        <div class="resource-description">Библиотека знаний</div>
+                    <div class="card">
+                        <h4 style="margin-bottom: var(--spacing-sm);">AI помнит:</h4>
+                        <ul id="sessionContext" style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                            <li>Ваши предыдущие разговоры</li>
+                            <li>Что вы уже пробовали</li>
+                            <li>Ваш прогресс</li>
+                        </ul>
                     </div>
                 </div>
             </div>
+
+            <!-- ElevenLabs Widget будет здесь -->
+            <elevenlabs-convai agent-id="agent_0801k80xz2xneqvrr7sp41e5fbpq"></elevenlabs-convai>
         </div>
 
         <!-- EMERGENCY SCREEN -->
@@ -967,32 +700,36 @@
                 <div style="width: 32px;"></div>
             </div>
             <div class="container">
-                <div class="emergency-container">
-                    <div class="emergency-icon">🆘</div>
-                    <h2 class="emergency-title">Вам нужна помощь?</h2>
-                    <p class="emergency-text">Если вы испытываете кризис, пожалуйста, обратитесь к специалистам</p>
+                <div style="text-align: center; padding: var(--spacing-xl);">
+                    <div style="font-size: 80px; margin-bottom: var(--spacing-lg);">🆘</div>
+                    <h2 style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-md);">
+                        Вам нужна помощь?
+                    </h2>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--spacing-xl);">
+                        Если вы испытываете кризис, пожалуйста, обратитесь к специалистам
+                    </p>
                 </div>
 
-                <div class="hotline-card">
-                    <div class="hotline-name">Телефон доверия</div>
-                    <div class="hotline-number">8-800-2000-122</div>
-                    <div class="card-description mt-lg">Бесплатная психологическая помощь, круглосуточно</div>
+                <div class="card" style="background: var(--bg-tertiary);">
+                    <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Телефон доверия</div>
+                    <div style="font-size: var(--font-size-lg); color: var(--accent-primary); font-weight: 700;">
+                        8-800-2000-122
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-top: var(--spacing-md);">
+                        Бесплатная психологическая помощь, круглосуточно
+                    </div>
                 </div>
 
-                <div class="hotline-card">
-                    <div class="hotline-name">Скорая помощь</div>
-                    <div class="hotline-number">103</div>
-                    <div class="card-description mt-lg">Экстренная медицинская помощь</div>
+                <div class="card" style="background: var(--bg-tertiary);">
+                    <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Скорая помощь</div>
+                    <div style="font-size: var(--font-size-lg); color: var(--accent-primary); font-weight: 700;">103</div>
+                    <div style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-top: var(--spacing-md);">
+                        Экстренная медицинская помощь
+                    </div>
                 </div>
 
-                <div class="hotline-card">
-                    <div class="hotline-name">Психологическая помощь онлайн</div>
-                    <div class="hotline-number">pomosh-ryadom.ru</div>
-                    <div class="card-description mt-lg">Онлайн-консультации специалистов</div>
-                </div>
-
-                <div class="card mt-lg" style="background: var(--accent-light); border: none;">
-                    <h3 class="card-title">Техники быстрого успокоения:</h3>
+                <div class="card" style="background: var(--accent-light); border: none;">
+                    <h3 style="margin-bottom: var(--spacing-md);">Техники быстрого успокоения:</h3>
                     <ul style="margin-left: var(--spacing-lg); color: var(--text-secondary);">
                         <li>Глубокое дыхание 4-4-4</li>
                         <li>Назовите 5 вещей, которые видите</li>
@@ -1003,105 +740,37 @@
             </div>
         </div>
 
-        <!-- SETTINGS SCREEN -->
-        <div class="screen" id="screen-settings">
-            <div class="header">
-                <button class="btn-icon" onclick="app.goBack()">←</button>
-                <div class="header-title">Настройки</div>
-                <div style="width: 32px;"></div>
-            </div>
-            <div class="container">
-                <div class="settings-group">
-                    <div class="settings-group-title">Профиль</div>
-                    <div class="setting-item">
-                        <div class="setting-label">Имя</div>
-                        <input type="text" class="input" id="settingsName" style="width: 150px; padding: 8px;">
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <div class="settings-group-title">Голос</div>
-                    <div class="setting-item">
-                        <div class="setting-label">Голос AI</div>
-                        <select id="voiceSelect">
-                            <option value="0">Женский (рус)</option>
-                            <option value="1">Мужской (рус)</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-label">Скорость речи</div>
-                        <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1">
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <div class="settings-group-title">Данные</div>
-                    <div class="setting-item">
-                        <button class="btn btn-secondary" onclick="app.clearHistory()">Очистить историю</button>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <div class="settings-group-title">О приложении</div>
-                    <div class="card">
-                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">
-                            ⚠️ Это демо-версия AI психолога. Не заменяет профессиональную психологическую помощь.
-                            Для серьезных проблем обратитесь к квалифицированному специалисту.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- BOTTOM NAVIGATION -->
-        <nav class="bottom-nav" id="bottomNav" style="display: none;">
-            <button class="nav-item" onclick="app.showScreen('mode')">
-                <span class="nav-icon">💬</span>
-                <span>Чат</span>
-            </button>
-            <button class="nav-item" onclick="app.showScreen('mood')">
-                <span class="nav-icon">📊</span>
-                <span>Настроение</span>
-            </button>
-            <button class="nav-item" onclick="app.showScreen('history')">
-                <span class="nav-icon">📖</span>
-                <span>История</span>
-            </button>
-            <button class="nav-item" onclick="app.showScreen('stats')">
-                <span class="nav-icon">📈</span>
-                <span>Статистика</span>
-            </button>
-            <button class="nav-item" onclick="app.showScreen('resources')">
-                <span class="nav-icon">🧘</span>
-                <span>Практики</span>
-            </button>
-        </nav>
-
     </div>
 
     <script>
+        // N8N API Configuration
+        const N8N_CONFIG = {
+            baseURL: 'https://your-n8n-instance.com/webhook', // Замените на ваш URL n8n
+            endpoints: {
+                createGoal: '/create-goal',
+                updateGoal: '/update-goal',
+                getGoals: '/get-goals',
+                createSession: '/create-session',
+                endSession: '/end-session',
+                saveContext: '/save-context'
+            }
+        };
+
         class AIPsychologistApp {
             constructor() {
                 this.currentScreen = 'welcome';
                 this.previousScreen = null;
-                this.currentMode = null;
+                this.currentGoal = null;
                 this.currentSession = null;
-                this.recognition = null;
-                this.synthesis = window.speechSynthesis;
-                this.voices = [];
 
+                // Local storage for demo (will be replaced by n8n)
                 this.data = {
-                    profile: {
+                    user: {
                         name: '',
-                        goals: '',
-                        topics: []
+                        firstVisit: true
                     },
-                    sessions: [],
-                    moods: [],
-                    settings: {
-                        voiceIndex: 0,
-                        speechRate: 1
-                    }
+                    goals: [],
+                    sessions: []
                 };
 
                 this.init();
@@ -1109,106 +778,32 @@
 
             init() {
                 this.loadData();
-                this.initSpeech();
-                this.updateStats();
-                this.renderHistory();
+                this.renderDashboard();
 
-                // Check if onboarding is completed
-                if (this.data.profile.name) {
-                    // Skip to mode selection if already onboarded
-                    // But still show welcome by default
+                // Check if first visit
+                if (!this.data.user.firstVisit && this.data.goals.length > 0) {
+                    this.showScreen('dashboard');
                 }
-
-                // Set mood date
-                const moodDate = document.getElementById('moodDate');
-                if (moodDate) {
-                    moodDate.textContent = new Date().toLocaleDateString('ru-RU', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                }
-
-                // Chat input enter key
-                const chatInput = document.getElementById('chatInput');
-                if (chatInput) {
-                    chatInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            this.sendMessage();
-                        }
-                    });
-                }
-            }
-
-            initSpeech() {
-                // Speech Recognition
-                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                    this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-                    this.recognition.continuous = false;
-                    this.recognition.interimResults = false;
-                    this.recognition.lang = 'ru-RU';
-
-                    this.recognition.onresult = (event) => {
-                        const transcript = event.results[0][0].transcript;
-                        document.getElementById('chatInput').value = transcript;
-                        this.sendMessage();
-                    };
-
-                    this.recognition.onerror = (event) => {
-                        console.error('Speech recognition error:', event.error);
-                    };
-                }
-
-                // Speech Synthesis
-                const loadVoices = () => {
-                    this.voices = this.synthesis.getVoices().filter(voice =>
-                        voice.lang.includes('ru') || voice.lang.includes('en')
-                    );
-                };
-                loadVoices();
-                this.synthesis.onvoiceschanged = loadVoices;
             }
 
             showScreen(screenId) {
                 this.previousScreen = this.currentScreen;
                 this.currentScreen = screenId;
 
-                // Hide all screens
                 document.querySelectorAll('.screen').forEach(screen => {
                     screen.classList.remove('active');
                 });
 
-                // Show requested screen
                 const screen = document.getElementById(`screen-${screenId}`);
                 if (screen) {
                     screen.classList.add('active');
                 }
 
-                // Show/hide bottom nav
-                const bottomNav = document.getElementById('bottomNav');
-                const screensWithNav = ['mode', 'history', 'mood', 'stats', 'resources'];
-                bottomNav.style.display = screensWithNav.includes(screenId) ? 'flex' : 'none';
-
-                // Update active nav item
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-
-                // Set active based on screen
-                const navMap = {
-                    'mode': 0,
-                    'mood': 1,
-                    'history': 2,
-                    'stats': 3,
-                    'resources': 4
-                };
-
-                if (navMap[screenId] !== undefined) {
-                    const navItems = document.querySelectorAll('.nav-item');
-                    if (navItems[navMap[screenId]]) {
-                        navItems[navMap[screenId]].classList.add('active');
-                    }
+                // Special handling for different screens
+                if (screenId === 'dashboard') {
+                    this.renderDashboard();
+                } else if (screenId === 'goal-detail' && this.currentGoal) {
+                    this.renderGoalDetail();
                 }
             }
 
@@ -1216,348 +811,297 @@
                 if (this.previousScreen) {
                     this.showScreen(this.previousScreen);
                 } else {
-                    this.showScreen('mode');
+                    this.showScreen('dashboard');
                 }
             }
 
-            completeOnboarding() {
-                const name = document.getElementById('userName').value.trim();
-                const goals = document.getElementById('userGoals').value.trim();
-                const topics = Array.from(document.querySelectorAll('.checkbox-label input:checked'))
-                    .map(cb => cb.value);
+            // ===== GOAL MANAGEMENT =====
 
-                if (!name) {
-                    alert('Пожалуйста, введите ваше имя');
+            async createGoal() {
+                const problem = document.getElementById('goalProblem').value.trim();
+                const desired = document.getElementById('goalDesired').value.trim();
+                const criteria = document.getElementById('goalCriteria').value.trim();
+                const duration = parseInt(document.getElementById('goalDuration').value);
+
+                if (!problem || !desired || !criteria) {
+                    alert('Пожалуйста, заполните все поля');
                     return;
                 }
 
-                this.data.profile = { name, goals, topics };
-                this.saveData();
-
-                document.getElementById('settingsName').value = name;
-
-                this.showScreen('mode');
-            }
-
-            startChat(mode) {
-                this.currentMode = mode;
-                this.currentSession = {
+                const goal = {
                     id: Date.now(),
-                    mode: mode,
-                    startTime: new Date(),
-                    messages: [],
-                    duration: 0
-                };
-
-                // Clear chat
-                document.getElementById('messages').innerHTML = '';
-
-                // Add welcome message
-                const userName = this.data.profile.name || 'там';
-                this.addMessage(`Здравствуйте${userName ? ', ' + userName : ''}! Я готов вас выслушать. Расскажите, что вас беспокоит.`, 'ai');
-
-                // Show/hide voice button
-                const voiceBtn = document.getElementById('voiceBtn');
-                if (mode === 'voice' || mode === 'hybrid') {
-                    voiceBtn.style.display = 'flex';
-                    this.setupVoiceButton();
-                } else {
-                    voiceBtn.style.display = 'none';
-                }
-
-                this.showScreen('chat');
-            }
-
-            setupVoiceButton() {
-                const voiceBtn = document.getElementById('voiceBtn');
-                voiceBtn.onclick = () => {
-                    if (!this.recognition) {
-                        alert('Голосовой ввод не поддерживается в вашем браузере');
-                        return;
-                    }
-
-                    if (voiceBtn.classList.contains('recording')) {
-                        this.recognition.stop();
-                        voiceBtn.classList.remove('recording');
-                    } else {
-                        this.recognition.start();
-                        voiceBtn.classList.add('recording');
-                    }
-                };
-
-                if (this.recognition) {
-                    this.recognition.onend = () => {
-                        voiceBtn.classList.remove('recording');
-                    };
-                }
-            }
-
-            sendMessage() {
-                const input = document.getElementById('chatInput');
-                const text = input.value.trim();
-
-                if (!text) return;
-
-                this.addMessage(text, 'user');
-                input.value = '';
-
-                this.currentSession.messages.push({
-                    role: 'user',
-                    content: text,
-                    timestamp: new Date()
-                });
-
-                // Show typing indicator
-                document.getElementById('typing').classList.add('show');
-
-                // Simulate AI response
-                setTimeout(() => {
-                    const response = this.generateAIResponse(text);
-                    document.getElementById('typing').classList.remove('show');
-                    this.addMessage(response, 'ai');
-
-                    this.currentSession.messages.push({
-                        role: 'assistant',
-                        content: response,
-                        timestamp: new Date()
-                    });
-
-                    // Speak response if voice mode
-                    if (this.currentMode === 'voice' || this.currentMode === 'hybrid') {
-                        this.speak(response);
-                    }
-                }, 1500 + Math.random() * 2000);
-            }
-
-            addMessage(text, sender) {
-                const messagesContainer = document.getElementById('messages');
-                const messageEl = document.createElement('div');
-                messageEl.className = `message ${sender}`;
-                messageEl.textContent = text;
-                messagesContainer.appendChild(messageEl);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-
-            generateAIResponse(input) {
-                const responses = {
-                    stress: [
-                        "Понимаю, что вы переживаете стресс. Расскажите подробнее, что именно вас беспокоит?",
-                        "Стресс - это нормальная реакция на сложные ситуации. Какие методы релаксации вы пробовали?",
-                        "Давайте вместе найдем способы справиться со стрессом. Что помогало вам раньше?"
-                    ],
-                    anxiety: [
-                        "Тревога может быть очень изматывающей. Когда вы впервые заметили эти ощущения?",
-                        "Понимаю ваше беспокойство. Попробуем вместе разобраться в причинах тревоги.",
-                        "Тревожные мысли имеют свойство усиливаться. Давайте поработаем с техниками успокоения."
-                    ],
-                    relationships: [
-                        "Отношения с близкими очень важны. Расскажите больше о ситуации.",
-                        "Конфликты в отношениях - это возможность для роста. Как вы видите решение?",
-                        "Понимаю, что отношения могут быть сложными. Что вы чувствуете в этой ситуации?"
-                    ],
-                    default: [
-                        "Спасибо, что поделились со мной. Расскажите больше о ваших чувствах.",
-                        "Я внимательно вас слушаю. Как это влияет на вашу повседневную жизнь?",
-                        "Понимаю. Что вы думаете об этой ситуации? Какие у вас есть мысли?"
+                    problem: problem,
+                    desired: desired,
+                    criteria: criteria,
+                    duration: duration,
+                    progress: 0,
+                    status: 'active',
+                    createdAt: new Date(),
+                    sessions: [],
+                    tasks: [
+                        { id: 1, text: 'Пройти первую сессию', completed: false },
+                        { id: 2, text: 'Определить триггеры', completed: false },
+                        { id: 3, text: 'Практиковать техники', completed: false }
                     ]
                 };
 
-                const lowerInput = input.toLowerCase();
-                let category = 'default';
+                // TODO: Send to n8n
+                // await this.apiCall('createGoal', goal);
 
-                if (lowerInput.includes('стресс') || lowerInput.includes('нервы') || lowerInput.includes('напряжение')) {
-                    category = 'stress';
-                } else if (lowerInput.includes('тревог') || lowerInput.includes('беспоко') || lowerInput.includes('страх')) {
-                    category = 'anxiety';
-                } else if (lowerInput.includes('отношени') || lowerInput.includes('семья') || lowerInput.includes('партнер')) {
-                    category = 'relationships';
-                }
-
-                const categoryResponses = responses[category];
-                return categoryResponses[Math.floor(Math.random() * categoryResponses.length)];
-            }
-
-            speak(text) {
-                this.synthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-
-                const voiceIndex = parseInt(this.data.settings.voiceIndex);
-                if (this.voices[voiceIndex]) {
-                    utterance.voice = this.voices[voiceIndex];
-                }
-
-                utterance.rate = parseFloat(this.data.settings.speechRate);
-                utterance.pitch = 1;
-                utterance.volume = 1;
-
-                this.synthesis.speak(utterance);
-            }
-
-            endChat() {
-                if (!this.currentSession || this.currentSession.messages.length < 2) {
-                    this.showScreen('mode');
-                    return;
-                }
-
-                // Calculate duration
-                const duration = Math.round((new Date() - this.currentSession.startTime) / 60000);
-                this.currentSession.duration = duration;
-                this.currentSession.endTime = new Date();
-
-                // Generate summary
-                this.generateSummary();
-
-                this.showScreen('summary');
-            }
-
-            generateSummary() {
-                // Simple summary generation (in real app, use AI)
-                const messages = this.currentSession.messages.filter(m => m.role === 'user');
-                const allText = messages.map(m => m.content).join(' ').toLowerCase();
-
-                let mainTopic = 'Общий разговор';
-                if (allText.includes('стресс') || allText.includes('напряжение')) {
-                    mainTopic = 'Стресс и напряжение';
-                } else if (allText.includes('тревог') || allText.includes('беспоко')) {
-                    mainTopic = 'Тревога и беспокойство';
-                } else if (allText.includes('отношени') || allText.includes('семья')) {
-                    mainTopic = 'Отношения';
-                }
-
-                this.currentSession.topic = mainTopic;
-                this.currentSession.summary = `В ходе сессии мы обсудили ${mainTopic.toLowerCase()}. Вы поделились своими переживаниями и мыслями.`;
-
-                document.getElementById('summaryContent').textContent = this.currentSession.summary;
-
-                document.getElementById('summaryInsights').innerHTML = `
-                    <li>Вы осознали важность обсуждаемой темы</li>
-                    <li>Проявили открытость в разговоре</li>
-                `;
-
-                document.getElementById('summaryRecommendations').innerHTML = `
-                    <li>Продолжайте отслеживать свое состояние в дневнике</li>
-                    <li>Попробуйте практики из раздела "Ресурсы"</li>
-                    <li>Вернитесь к этой теме в следующей сессии</li>
-                `;
-            }
-
-            saveSummary() {
-                this.data.sessions.push(this.currentSession);
+                this.data.goals.push(goal);
                 this.saveData();
-                this.updateStats();
-                this.renderHistory();
-                alert('Сессия сохранена в истории!');
-                this.showScreen('mode');
+
+                // Clear form
+                document.getElementById('goalProblem').value = '';
+                document.getElementById('goalDesired').value = '';
+                document.getElementById('goalCriteria').value = '';
+
+                this.showScreen('dashboard');
             }
 
-            selectMood(mood) {
-                document.querySelectorAll('.mood-btn').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
-                document.querySelector(`[data-mood="${mood}"]`).classList.add('selected');
-            }
+            renderDashboard() {
+                const goalsList = document.getElementById('goalsList');
+                const emptyState = document.getElementById('emptyState');
 
-            saveMood() {
-                const selectedMood = document.querySelector('.mood-btn.selected');
-                if (!selectedMood) {
-                    alert('Пожалуйста, выберите настроение');
+                if (this.data.goals.length === 0) {
+                    goalsList.innerHTML = '';
+                    emptyState.style.display = 'block';
                     return;
                 }
 
-                const mood = selectedMood.dataset.mood;
-                const note = document.getElementById('moodNote').value;
+                emptyState.style.display = 'none';
 
-                this.data.moods.push({
-                    mood: mood,
-                    note: note,
-                    date: new Date()
+                // Separate active and completed goals
+                const activeGoals = this.data.goals.filter(g => g.status === 'active');
+                const completedGoals = this.data.goals.filter(g => g.status === 'completed');
+
+                let html = '';
+
+                // Active goals
+                activeGoals.forEach(goal => {
+                    const weeksPassed = Math.floor((new Date() - new Date(goal.createdAt)) / (7 * 24 * 60 * 60 * 1000));
+                    html += `
+                        <div class="goal-card" onclick="app.openGoal(${goal.id})">
+                            <div class="goal-header">
+                                <div class="goal-title">🎯 ${goal.problem}</div>
+                                <div class="goal-status active">В работе</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${goal.progress}%"></div>
+                            </div>
+                            <div class="goal-stats">
+                                <span>📊 Прогресс: ${goal.progress}%</span>
+                                <span>•</span>
+                                <span>💬 Сессий: ${goal.sessions.length}</span>
+                                <span>•</span>
+                                <span>📅 ${weeksPassed} нед.</span>
+                            </div>
+                            ${goal.tasks && goal.tasks.length > 0 ? `
+                                <div class="goal-next">
+                                    <strong>Следующий шаг:</strong> ${goal.tasks.find(t => !t.completed)?.text || 'Все задачи выполнены!'}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
                 });
 
-                this.saveData();
-                alert('Настроение сохранено!');
-
-                // Reset
-                selectedMood.classList.remove('selected');
-                document.getElementById('moodNote').value = '';
-
-                this.renderMoodChart();
-            }
-
-            renderMoodChart() {
-                // Simple text-based chart (in real app, use chart library)
-                const chart = document.getElementById('moodChart');
-                const lastWeek = this.data.moods.slice(-7);
-
-                if (lastWeek.length === 0) {
-                    chart.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Нет данных за последнюю неделю</p>';
-                    return;
+                // Completed goals
+                if (completedGoals.length > 0) {
+                    html += '<h3 style="margin: var(--spacing-lg) 0 var(--spacing-md) 0; color: var(--text-secondary);">Завершённые цели</h3>';
+                    completedGoals.forEach(goal => {
+                        html += `
+                            <div class="goal-card completed" onclick="app.openGoal(${goal.id})">
+                                <div class="goal-header">
+                                    <div class="goal-title">✅ ${goal.problem}</div>
+                                    <div class="goal-status completed">Достигнута</div>
+                                </div>
+                                <div class="goal-stats">
+                                    <span>💬 Сессий: ${goal.sessions.length}</span>
+                                    <span>•</span>
+                                    <span>✓ Завершено ${new Date(goal.completedAt).toLocaleDateString('ru-RU')}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
                 }
 
-                const moodEmojis = {
-                    'great': '😊',
-                    'good': '🙂',
-                    'okay': '😐',
-                    'bad': '😔',
-                    'terrible': '😢'
+                goalsList.innerHTML = html;
+            }
+
+            openGoal(goalId) {
+                this.currentGoal = this.data.goals.find(g => g.id === goalId);
+                if (this.currentGoal) {
+                    this.showScreen('goal-detail');
+                }
+            }
+
+            renderGoalDetail() {
+                if (!this.currentGoal) return;
+
+                document.getElementById('goalDetailTitle').textContent = this.currentGoal.problem;
+                document.getElementById('goalDetailProgress').textContent = `Прогресс: ${this.currentGoal.progress}%`;
+
+                // Stats
+                const weeksPassed = Math.floor((new Date() - new Date(this.currentGoal.createdAt)) / (7 * 24 * 60 * 60 * 1000));
+                const weeksTotal = Math.ceil(this.currentGoal.duration / 7);
+                const statsHtml = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-md);">
+                        <div>
+                            <div style="font-size: var(--font-size-xs); color: var(--text-secondary);">Прошло</div>
+                            <div style="font-size: var(--font-size-lg); font-weight: 600;">${weeksPassed} нед.</div>
+                        </div>
+                        <div>
+                            <div style="font-size: var(--font-size-xs); color: var(--text-secondary);">Всего</div>
+                            <div style="font-size: var(--font-size-lg); font-weight: 600;">${weeksTotal} нед.</div>
+                        </div>
+                        <div>
+                            <div style="font-size: var(--font-size-xs); color: var(--text-secondary);">Сессий</div>
+                            <div style="font-size: var(--font-size-lg); font-weight: 600;">${this.currentGoal.sessions.length}</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${this.currentGoal.progress}%"></div>
+                    </div>
+                `;
+                document.getElementById('goalDetailStats').innerHTML = statsHtml;
+
+                // Tasks
+                const tasksHtml = this.currentGoal.tasks.map(task => `
+                    <li class="task-item ${task.completed ? 'completed' : ''}">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''}
+                               onchange="app.toggleTask(${task.id})">
+                        <span>${task.text}</span>
+                    </li>
+                `).join('');
+                document.getElementById('goalDetailTasks').innerHTML = tasksHtml;
+
+                // Sessions
+                const sessionsHtml = this.currentGoal.sessions.length > 0
+                    ? this.currentGoal.sessions.map(session => `
+                        <div class="session-item">
+                            <div>
+                                <div style="font-weight: 600;">Сессия ${session.number}</div>
+                                <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                    ${new Date(session.date).toLocaleDateString('ru-RU')}
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div>${session.duration} мин</div>
+                            </div>
+                        </div>
+                    `).join('')
+                    : '<p style="color: var(--text-secondary); text-align: center; padding: var(--spacing-lg);">Пока нет сессий</p>';
+                document.getElementById('goalDetailSessions').innerHTML = sessionsHtml;
+            }
+
+            toggleTask(taskId) {
+                if (!this.currentGoal) return;
+                const task = this.currentGoal.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveData();
+                    this.renderGoalDetail();
+
+                    // Update progress based on completed tasks
+                    const completedCount = this.currentGoal.tasks.filter(t => t.completed).length;
+                    const progress = Math.round((completedCount / this.currentGoal.tasks.length) * 100);
+                    this.currentGoal.progress = Math.max(this.currentGoal.progress, progress);
+                }
+            }
+
+            completeGoal() {
+                if (!this.currentGoal) return;
+
+                if (confirm('Вы уверены, что достигли этой цели?')) {
+                    this.currentGoal.status = 'completed';
+                    this.currentGoal.completedAt = new Date();
+                    this.currentGoal.progress = 100;
+                    this.saveData();
+
+                    alert('🎉 Поздравляем! Цель достигнута!');
+                    this.showScreen('dashboard');
+                }
+            }
+
+            // ===== SESSION MANAGEMENT =====
+
+            async startSession() {
+                if (!this.currentGoal) return;
+
+                const session = {
+                    id: Date.now(),
+                    goalId: this.currentGoal.id,
+                    number: this.currentGoal.sessions.length + 1,
+                    startTime: new Date(),
+                    context: {
+                        goalProblem: this.currentGoal.problem,
+                        progress: this.currentGoal.progress,
+                        previousSessions: this.currentGoal.sessions.length
+                    }
                 };
 
-                chart.innerHTML = lastWeek.map(m => {
-                    const date = new Date(m.date).toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' });
-                    return `<div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>${date}</span>
-                        <span style="font-size: 24px;">${moodEmojis[m.mood]}</span>
-                    </div>`;
-                }).join('');
+                this.currentSession = session;
+
+                // TODO: Send context to n8n
+                // await this.apiCall('createSession', session);
+
+                document.getElementById('sessionTitle').textContent = `Сессия ${session.number}`;
+                document.getElementById('sessionGoalName').textContent = this.currentGoal.problem;
+
+                this.showScreen('session');
             }
 
-            renderHistory() {
-                const container = document.getElementById('historyContainer');
+            endSession() {
+                if (this.currentSession && this.currentGoal) {
+                    const duration = Math.round((new Date() - this.currentSession.startTime) / 60000);
+                    this.currentSession.duration = duration;
+                    this.currentSession.endTime = new Date();
+                    this.currentSession.date = this.currentSession.startTime;
 
-                if (this.data.sessions.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">Пока нет сохраненных сессий</p>';
-                    return;
-                }
+                    this.currentGoal.sessions.push(this.currentSession);
 
-                container.innerHTML = this.data.sessions.reverse().map(session => `
-                    <div class="session-card">
-                        <div class="session-header">
-                            <div class="session-date">${new Date(session.startTime).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>
-                            <div class="session-duration">⏱️ ${session.duration} мин</div>
-                        </div>
-                        <div class="session-topic">${session.topic || 'Общий разговор'}</div>
-                        <div class="session-summary">${session.summary || 'Сессия завершена'}</div>
-                    </div>
-                `).join('');
-            }
+                    // Increase progress
+                    this.currentGoal.progress = Math.min(100, this.currentGoal.progress + 10);
 
-            updateStats() {
-                const totalSessions = this.data.sessions.length;
-                const totalTime = this.data.sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
-                const days = new Set(this.data.moods.map(m => new Date(m.date).toDateString())).size;
-
-                const moodValues = { 'great': 5, 'good': 4, 'okay': 3, 'bad': 2, 'terrible': 1 };
-                const avgMood = this.data.moods.length > 0
-                    ? (this.data.moods.reduce((sum, m) => sum + moodValues[m.mood], 0) / this.data.moods.length).toFixed(1)
-                    : '-';
-
-                const avgMoodEmoji = avgMood >= 4 ? '😊' : avgMood >= 3 ? '🙂' : avgMood >= 2 ? '😐' : '😔';
-
-                document.getElementById('statSessions').textContent = totalSessions;
-                document.getElementById('statTime').textContent = totalTime;
-                document.getElementById('statDays').textContent = days;
-                document.getElementById('statMood').textContent = avgMood !== '-' ? avgMoodEmoji : '-';
-            }
-
-            clearHistory() {
-                if (confirm('Вы уверены? Это удалит всю историю сессий и настроений.')) {
-                    this.data.sessions = [];
-                    this.data.moods = [];
                     this.saveData();
-                    this.updateStats();
-                    this.renderHistory();
-                    alert('История очищена');
+
+                    // TODO: Save to n8n
+                    // await this.apiCall('endSession', this.currentSession);
+
+                    this.currentSession = null;
+                }
+
+                this.showScreen('goal-detail');
+            }
+
+            // ===== API CALLS (n8n integration) =====
+
+            async apiCall(endpoint, data) {
+                // This will be replaced with actual n8n API calls
+                const url = N8N_CONFIG.baseURL + N8N_CONFIG.endpoints[endpoint];
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API call failed: ${response.statusText}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('API Error:', error);
+                    // Fallback to local storage for now
+                    return null;
                 }
             }
+
+            // ===== DATA PERSISTENCE =====
 
             saveData() {
                 localStorage.setItem('aiPsychologistData', JSON.stringify(this.data));
@@ -1567,16 +1111,6 @@
                 const saved = localStorage.getItem('aiPsychologistData');
                 if (saved) {
                     this.data = JSON.parse(saved);
-
-                    // Populate settings
-                    if (this.data.profile.name) {
-                        document.getElementById('settingsName').value = this.data.profile.name;
-                    }
-
-                    if (this.data.settings) {
-                        document.getElementById('voiceSelect').value = this.data.settings.voiceIndex || 0;
-                        document.getElementById('speechRate').value = this.data.settings.speechRate || 1;
-                    }
                 }
             }
         }
